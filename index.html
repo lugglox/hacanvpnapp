@@ -1,103 +1,327 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VPN Mini App</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hacan VPN</title>
     <!-- Подключаем Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-      body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-          Arial, sans-serif;
-        background-color: var(--tg-theme-bg-color, #1c1c1e);
-        color: var(--tg-theme-text-color, #ffffff);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-        box-sizing: border-box;
-      }
+        /* ОСНОВНЫЕ СТИЛИ И ПЕРЕМЕННЫЕ */
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #1c1c1e);
+            --secondary-bg-color: var(--tg-theme-secondary-bg-color, #2c2c2e);
+            --text-color: var(--tg-theme-text-color, #ffffff);
+            --hint-color: var(--tg-theme-hint-color, #8e8e93);
+            --button-color: var(--tg-theme-button-color, #007aff);
+            --button-text-color: var(--tg-theme-button-text-color, #ffffff);
+            --accent-green: #34c759;
+            --accent-red: #ff3b30;
+            
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-      .card {
-        background-color: var(--tg-theme-secondary-bg-color, #2c2c2e);
-        border-radius: 16px;
-        padding: 24px;
-        width: 100%;
-        max-width: 360px;
-        text-align: center;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            box-sizing: border-box;
+        }
 
-      h1 {
-        font-size: 22px;
-        margin-bottom: 8px;
-      }
+        /* КОНТЕЙНЕР ПРИЛОЖЕНИЯ */
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
 
-      p {
-        font-size: 14px;
-        color: #8e8e93;
-        margin-bottom: 24px;
-      }
+        /* ШАПКА */
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
 
-      .btn {
-        background-color: var(--tg-theme-button-color, #007aff);
-        color: var(--tg-theme-button-text-color, #ffffff);
-        border: none;
-        border-radius: 12px;
-        padding: 14px 20px;
-        font-size: 16px;
-        font-weight: 600;
-        width: 100%;
-        cursor: pointer;
-        transition: opacity 0.2s;
-      }
+        .logo-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
 
-      .btn:active {
-        opacity: 0.8;
-      }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+        }
 
-      .status-badge {
-        display: inline-block;
-        background-color: rgba(52, 199, 89, 0.15);
-        color: #34c759;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 500;
-        margin-bottom: 20px;
-      }
+        .username {
+            color: var(--button-color);
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--hint-color);
+            margin: 0;
+        }
+
+        /* КАРТОЧКИ */
+        .card {
+            background-color: var(--secondary-bg-color);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        /* СТАТУС */
+        .status-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-label {
+            font-size: 14px;
+            color: var(--hint-color);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background-color: rgba(52, 199, 89, 0.1);
+            color: var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        /* КНОПКА ГЕНЕРАЦИИ */
+        .main-button-wrapper {
+            margin-top: auto; /* Прижимаем вниз */
+            padding-bottom: 20px;
+        }
+
+        .btn-main {
+            background-color: var(--button-color);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-main:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .btn-main:disabled {
+            background-color: var(--hint-color);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* БЛОК С КЛЮЧОМ (СКРЫТ ПО УМОЛЧАНИЮ) */
+        #key-section {
+            display: none; /* Скрыто */
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        #key-section.show {
+            display: block;
+            animation: slideIn 0.4s forwards;
+        }
+
+        .key-header {
+            font-size: 14px;
+            color: var(--hint-color);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .key-container {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            word-break: break-all;
+            color: var(--accent-green);
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        .btn-copy {
+            background: none;
+            border: none;
+            color: var(--button-color);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 8px;
+        }
+
+        /* АНИМАЦИИ */
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Загрузчик (спиннер) */
+        .spinner {
+            display: none; /* Скрыт */
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading .spinner { display: block; }
+        .loading .btn-text { display: none; }
+
     </style>
-  </head>
-  <body>
-    <div class="card">
-      <div class="status-badge">● Сервер активен</div>
-      <h1 id="user-greeting">Привет!</h1>
-      <p>Нажми на кнопку ниже, чтобы сгенерировать персональный VPN-ключ.</p>
+</head>
+<body>
 
-      <button class="btn" onclick="generateKey()">⚡ Получить ключ</button>
+    <div class="app-container">
+        
+        <!-- ШАПКА -->
+        <div class="header">
+            <div class="logo-icon">🛡️</div>
+            <h1>Hacan <span class="username" id="user-name">VPN</span></h1>
+            <p class="subtitle">Твой личный доступ к свободному интернету</p>
+        </div>
+
+        <!-- КАРТОЧКА СТАТУСА -->
+        <div class="card status-wrapper">
+            <span class="status-label">Статус сервера</span>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                ONLINE
+            </div>
+        </div>
+
+        <!-- БЛОК С КЛЮЧОМ (ПОЯВЛЯЕТСЯ ПОСЛЕ КЛИКА) -->
+        <div id="key-section" class="card">
+            <div class="key-header">
+                <span>Ваш персональный ключ доступа:</span>
+                <button class="btn-copy" onclick="copyKey()" id="copy-btn">Скопировать</button>
+            </div>
+            <div class="key-container" id="key-area">
+                vless://example-key-1234567890abcdef@123.45.67.89:443?type=tcp&security=reality#HacanVPN_User
+            </div>
+        </div>
+
+        <!-- ГЛАВНАЯ КНОПКА (ПРИЖАТА ВНИЗ) -->
+        <div class="main-button-wrapper">
+            <button class="btn-main" id="main-generate-btn" onclick="requestKey()">
+                <div class="spinner"></div>
+                <span class="btn-text">⚡ Получить ключ</span>
+            </button>
+        </div>
+
     </div>
 
     <script>
-      // Инициализация Telegram WebApp
-      const tg = window.Telegram.WebApp;
-      tg.expand(); // Разворачиваем окно на весь экран
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем окно
+        tg.ready();
 
-      // Выводим имя пользователя из Telegram
-      if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        document.getElementById("user-greeting").innerText =
-          `Привет, ${tg.initDataUnsafe.user.first_name}! 👋`;
-      }
+        // Установка имени пользователя
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+        }
 
-      function generateKey() {
-        // Отправляем данные обратно в бота
-        tg.sendData(JSON.stringify({ action: "get_vpn_key" }));
-        tg.close(); // Закрываем Mini App
-      }
+        // Кнопки и секции
+        const generateBtn = document.getElementById('main-generate-btn');
+        const keySection = document.getElementById('key-section');
+        const keyArea = document.getElementById('key-area');
+        const copyBtn = document.getElementById('copy-btn');
+
+        // КЛИК НА "ПОЛУЧИТЬ КЛЮЧ"
+        function requestKey() {
+            // 1. Включаем режим загрузки на кнопке
+            generateBtn.classList.add('loading');
+            generateBtn.disabled = true;
+
+            // 2. Имитируем запрос к бэкенду (2 секунды)
+            // Позже это будет заменено на tg.sendData или API запрос
+            setTimeout(() => {
+                // 3. Выключаем загрузку
+                generateBtn.classList.remove('loading');
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '✨ Ключ получен';
+
+                // 4. Показываем секцию с ключом
+                keySection.classList.add('show');
+                
+                // 5. Вибрация (Haptic Feedback) - успех
+                tg.HapticFeedback.notificationOccurred('success');
+
+            }, 2000);
+        }
+
+        // КЛИК НА "СКОПИРОВАТЬ"
+        function copyKey() {
+            const keyText = keyArea.innerText;
+            
+            // Используем Clipboard API
+            navigator.clipboard.writeText(keyText).then(() => {
+                // Успешно скопировано
+                copyBtn.innerText = 'Скопировано!';
+                copyBtn.style.color = 'var(--accent-green)';
+                
+                // Легкая вибрация
+                tg.HapticFeedback.impactOccurred('light');
+
+                // Возвращаем текст кнопки через 2 секунды
+                setTimeout(() => {
+                    copyBtn.innerText = 'Скопировать';
+                    copyBtn.style.color = 'var(--button-color)';
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                alert('Не удалось скопировать ключ.');
+            });
+        }
     </script>
-  </body>
+</body>
 </html>
