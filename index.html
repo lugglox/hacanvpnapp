@@ -3,128 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hacan VPN</title>
-    <!-- Подключаем Telegram WebApp SDK -->
+    <title>Hacan VPN Panel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ОСНОВНЫЕ СТИЛИ И ПЕРЕМЕННЫЕ */
         :root {
-            --bg-color: var(--tg-theme-bg-color, #1c1c1e);
-            --secondary-bg-color: var(--tg-theme-secondary-bg-color, #2c2c2e);
+            --bg-color: var(--tg-theme-bg-color, #0f0f12);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #1a1a20);
+            --card-bg: #23232c;
             --text-color: var(--tg-theme-text-color, #ffffff);
-            --hint-color: var(--tg-theme-hint-color, #8e8e93);
-            --button-color: var(--tg-theme-button-color, #007aff);
-            --button-text-color: var(--tg-theme-button-text-color, #ffffff);
-            --accent-green: #34c759;
-            --accent-red: #ff3b30;
-            
+            --hint-color: var(--tg-theme-hint-color, #8a8a9e);
+            --accent-color: var(--tg-theme-button-color, #5856d6);
+            --accent-green: #30d158;
+            --accent-orange: #ff9f0a;
+            --border-radius: 18px;
             --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
+            padding: 16px 16px 90px 16px;
             box-sizing: border-box;
+            -webkit-user-select: none;
         }
 
-        /* КОНТЕЙНЕР ПРИЛОЖЕНИЯ */
-        .app-container {
-            width: 100%;
-            max-width: 400px;
+        /* НАВИГАЦИЯ */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* НИЖНЕЕ МЕНЮ */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(26, 26, 32, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 24px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-        }
-
-        /* ШАПКА */
-        .header {
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        .logo-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0 0 4px 0;
-        }
-
-        .username {
-            color: var(--button-color);
-        }
-
-        .subtitle {
-            font-size: 14px;
+            align-items: center;
+            gap: 4px;
             color: var(--hint-color);
-            margin: 0;
-        }
-
-        /* КАРТОЧКИ */
-        .card {
-            background-color: var(--secondary-bg-color);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
             transition: var(--transition);
+            width: 20%;
         }
 
-        /* СТАТУС */
-        .status-wrapper {
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        /* КАРТОЧКИ И БЛОКИ */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .profile-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 14px;
         }
 
-        .status-label {
-            font-size: 14px;
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .user-info h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .user-info p {
+            margin: 2px 0 0 0;
+            font-size: 13px;
             color: var(--hint-color);
         }
 
-        .status-badge {
+        /* СТАТИСТИКА И БАЛАНС */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background-color: var(--secondary-bg);
+            border-radius: 14px;
+            padding: 14px;
             display: flex;
-            align-items: center;
-            gap: 6px;
-            background-color: rgba(52, 199, 89, 0.1);
-            color: var(--accent-green);
-            padding: 6px 12px;
-            border-radius: 20px;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-title {
             font-size: 12px;
-            font-weight: 600;
+            color: var(--hint-color);
         }
 
-        .status-dot {
-            width: 8px;
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .badge-active {
+            color: var(--accent-green);
+        }
+
+        /* ПРОГРЕСС БАР ТРАФИКА */
+        .progress-bar-bg {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
             height: 8px;
-            background-color: var(--accent-green);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent-green);
+            width: 100%;
+            overflow: hidden;
+            margin-top: 8px;
         }
 
-        /* КНОПКА ГЕНЕРАЦИИ */
-        .main-button-wrapper {
-            margin-top: auto; /* Прижимаем вниз */
-            padding-bottom: 20px;
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-color));
+            height: 100%;
+            width: 25%; /* Расход трафика */
+            border-radius: 10px;
         }
 
-        .btn-main {
-            background-color: var(--button-color);
-            color: var(--button-text-color);
+        /* КНОПКИ */
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #fff;
             border: none;
             border-radius: 14px;
-            padding: 16px;
-            font-size: 16px;
+            padding: 14px;
+            font-size: 15px;
             font-weight: 600;
             width: 100%;
             cursor: pointer;
@@ -133,194 +184,319 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
 
-        .btn-main:active {
+        .btn-primary:active {
             transform: scale(0.98);
             opacity: 0.9;
         }
 
-        .btn-main:disabled {
-            background-color: var(--hint-color);
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        /* БЛОК С КЛЮЧОМ (СКРЫТ ПО УМОЛЧАНИЮ) */
-        #key-section {
-            display: none; /* Скрыто */
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        #key-section.show {
-            display: block;
-            animation: slideIn 0.4s forwards;
-        }
-
-        .key-header {
-            font-size: 14px;
-            color: var(--hint-color);
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .key-container {
-            background-color: rgba(0,0,0,0.2);
-            border-radius: 10px;
-            padding: 12px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 12px;
-            word-break: break-all;
-            color: var(--accent-green);
-            border: 1px solid rgba(255,255,255,0.05);
-            position: relative;
-        }
-
-        .btn-copy {
-            background: none;
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: var(--text-color);
             border: none;
-            color: var(--button-color);
-            font-size: 12px;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            padding: 0;
-            margin-left: 8px;
+            width: 100%;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        /* АНИМАЦИИ */
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* ТАРИФЫ */
+        .plan-card {
+            background-color: var(--secondary-bg);
+            border: 2px solid transparent;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
         }
 
-        /* Загрузчик (спиннер) */
-        .spinner {
-            display: none; /* Скрыт */
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
+        .plan-card.selected {
+            border-color: var(--accent-color);
+            background-color: rgba(88, 86, 214, 0.15);
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .plan-price {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--accent-green);
         }
 
-        .loading .spinner { display: block; }
-        .loading .btn-text { display: none; }
+        /* КЛЮЧ */
+        .key-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+            color: var(--accent-green);
+            margin: 10px 0;
+            border: 1px dashed rgba(255,255,255,0.15);
+        }
 
+        /* СПИСОК СЕРВЕРОВ */
+        .server-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .server-item:last-child { border-bottom: none; }
+        .server-flag { font-size: 20px; margin-right: 10px; }
+        .server-name { font-weight: 600; font-size: 14px; }
+        .ping-badge { font-size: 12px; color: var(--accent-green); font-weight: 500; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        
-        <!-- ШАПКА -->
-        <div class="header">
-            <div class="logo-icon">🛡️</div>
-            <h1>Hacan <span class="username" id="user-name">VPN</span></h1>
-            <p class="subtitle">Твой личный доступ к свободному интернету</p>
+    <!-- ВКЛАДКА 1: VPN СЕРВЕР -->
+    <div id="tab-home" class="tab-content active">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 14px; color: var(--hint-color);">Статус соединения</span>
+                <span style="color: var(--accent-green); font-size: 13px; font-weight: 600;">● Подключено</span>
+            </div>
+            <h3 style="margin: 0 0 12px 0;">Hacan VLESS Reality</h3>
+            
+            <div style="margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--hint-color);">
+                    <span>Использовано трафика</span>
+                    <span>25.4 GB / ∞</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill"></div>
+                </div>
+            </div>
+
+            <span style="font-size: 12px; color: var(--hint-color);">Ваш персональный ключ:</span>
+            <div class="key-box" id="key-text">vless://hacan-key-8392104@185.220.101.5:443?type=tcp&security=reality#HacanVPN</div>
+            
+            <button class="btn-primary" onclick="copyVPNKey()">📋 Скопировать ключ</button>
         </div>
 
-        <!-- КАРТОЧКА СТАТУСА -->
-        <div class="card status-wrapper">
-            <span class="status-label">Статус сервера</span>
-            <div class="status-badge">
-                <div class="status-dot"></div>
-                ONLINE
+        <div class="card">
+            <h4 style="margin: 0 0 12px 0;">Локации серверов</h4>
+            <div class="server-item">
+                <div style="display: flex; align-items: center;">
+                    <span class="server-flag">🇩🇪</span>
+                    <span class="server-name">Германия (Франкфурт)</span>
+                </div>
+                <span class="ping-badge">32 ms</span>
+            </div>
+            <div class="server-item">
+                <div style="display: flex; align-items: center;">
+                    <span class="server-flag">🇳🇱</span>
+                    <span class="server-name">Нидерланды (Амстердам)</span>
+                </div>
+                <span class="ping-badge">41 ms</span>
+            </div>
+            <div class="server-item">
+                <div style="display: flex; align-items: center;">
+                    <span class="server-flag">🇵🇱</span>
+                    <span class="server-name">Польша (Варшава)</span>
+                </div>
+                <span class="ping-badge">25 ms</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ВКЛАДКА 2: ТАРИФЫ / ПОДПИСКА -->
+    <div id="tab-plans" class="tab-content">
+        <div class="card">
+            <h3 style="margin: 0 0 16px 0;">Выбор подписки</h3>
+            
+            <div class="plan-card selected" onclick="selectPlan(this, '1_month')">
+                <div>
+                    <div style="font-weight: 600;">1 Месяц</div>
+                    <div style="font-size: 12px; color: var(--hint-color);">Базовый доступ</div>
+                </div>
+                <div class="plan-price">100 ₴</div>
+            </div>
+
+            <div class="plan-card" onclick="selectPlan(this, '3_months')">
+                <div>
+                    <div style="font-weight: 600;">3 Месяца <span style="font-size: 10px; background: var(--accent-orange); color: #000; padding: 2px 6px; border-radius: 8px;">-15%</span></div>
+                    <div style="font-size: 12px; color: var(--hint-color);">Экономия 45 ₴</div>
+                </div>
+                <div class="plan-price">255 ₴</div>
+            </div>
+
+            <div class="plan-card" onclick="selectPlan(this, '12_months')">
+                <div>
+                    <div style="font-weight: 600;">1 Год <span style="font-size: 10px; background: var(--accent-green); color: #000; padding: 2px 6px; border-radius: 8px;">TOP</span></div>
+                    <div style="font-size: 12px; color: var(--hint-color);">Максимальная выгода</div>
+                </div>
+                <div class="plan-price">800 ₴</div>
+            </div>
+
+            <button class="btn-primary" style="margin-top: 12px;" onclick="buySubscription()">💳 Оплатить подписку</button>
+        </div>
+    </div>
+
+    <!-- ВКЛАДКА 3: ПРОФИЛЬ -->
+    <div id="tab-profile" class="tab-content">
+        <div class="card">
+            <div class="profile-header">
+                <div class="avatar" id="avatar-letter">H</div>
+                <div class="user-info">
+                    <h2 id="profile-name">Пользователь</h2>
+                    <p id="profile-id">ID: 000000000</p>
+                </div>
             </div>
         </div>
 
-        <!-- БЛОК С КЛЮЧОМ (ПОЯВЛЯЕТСЯ ПОСЛЕ КЛИКА) -->
-        <div id="key-section" class="card">
-            <div class="key-header">
-                <span>Ваш персональный ключ доступа:</span>
-                <button class="btn-copy" onclick="copyKey()" id="copy-btn">Скопировать</button>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-title">Баланс</span>
+                <span class="stat-value" id="user-balance">0 ₴</span>
             </div>
-            <div class="key-container" id="key-area">
-                vless://example-key-1234567890abcdef@123.45.67.89:443?type=tcp&security=reality#HacanVPN_User
+            <div class="stat-card">
+                <span class="stat-title">Подписка</span>
+                <span class="stat-value badge-active" id="sub-days">30 дней</span>
             </div>
         </div>
 
-        <!-- ГЛАВНАЯ КНОПКА (ПРИЖАТА ВНИЗ) -->
-        <div class="main-button-wrapper">
-            <button class="btn-main" id="main-generate-btn" onclick="requestKey()">
-                <div class="spinner"></div>
-                <span class="btn-text">⚡ Получить ключ</span>
-            </button>
+        <div class="card">
+            <h4 style="margin: 0 0 10px 0;">Управление кошельком</h4>
+            <button class="btn-primary" onclick="depositBalance()">💰 Пополнить баланс</button>
+        </div>
+    </div>
+
+    <!-- ВКЛАДКА 4: РЕФЕРАЛЫ -->
+    <div id="tab-ref" class="tab-content">
+        <div class="card">
+            <h3>🎁 Приглашай друзей</h3>
+            <p style="font-size: 13px; color: var(--hint-color); line-height: 1.4;">
+                Получай **+7 дней подписки** за каждого зарегистрированного друга!
+            </p>
+            
+            <span style="font-size: 12px; color: var(--hint-color);">Твоя реферальная ссылка:</span>
+            <div class="key-box" id="ref-link">https://t.me/HacanVpnBot?start=ref12345</div>
+            
+            <button class="btn-primary" onclick="copyRefLink()">🔗 Скопировать ссылку</button>
+        </div>
+    </div>
+
+    <!-- ВКЛАДКА 5: ПОМОЩЬ / САППОРТ -->
+    <div id="tab-help" class="tab-content">
+        <div class="card">
+            <h3 style="margin-top: 0;">📲 Приложения для подключения</h3>
+            <button class="btn-secondary" onclick="openLink('https://apps.apple.com/app/v2rayng')">🍏 iOS (Happ / FoXray)</button>
+            <button class="btn-secondary" onclick="openLink('https://github.com/2dust/v2rayNG/releases')">🤖 Android (v2rayNG)</button>
+            <button class="btn-secondary" onclick="openLink('https://github.com/MatsuriDayo/nekoray/releases')">💻 Windows / Mac (NekoBox)</button>
         </div>
 
+        <div class="card">
+            <h3 style="margin-top: 0;">💬 Нужна помощь?</h3>
+            <p style="font-size: 13px; color: var(--hint-color);">Если VPN не подключается или есть вопросы по оплате, напишите в поддержку.</p>
+            <button class="btn-primary" onclick="openSupport()">👨‍💻 Написать в поддержку</button>
+        </div>
+    </div>
+
+    <!-- НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('tab-home', this)">
+            <span class="nav-icon">🛡️</span>
+            <span>VPN</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-plans', this)">
+            <span class="nav-icon">⚡</span>
+            <span>Тарифы</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-profile', this)">
+            <span class="nav-icon">👤</span>
+            <span>Профиль</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-ref', this)">
+            <span class="nav-icon">🎁</span>
+            <span>Бонусы</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-help', this)">
+            <span class="nav-icon">❓</span>
+            <span>Помощь</span>
+        </div>
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем окно
+        tg.expand();
         tg.ready();
 
-        // Установка имени пользователя
+        let selectedPlan = '1_month';
+
+        // Заполнение профиля из Telegram
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+            const user = tg.initDataUnsafe.user;
+            document.getElementById('profile-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+            document.getElementById('profile-id').innerText = 'ID: ' + user.id;
+            document.getElementById('avatar-letter').innerText = user.first_name.charAt(0).toUpperCase();
+            document.getElementById('ref-link').innerText = `https://t.me/HacanVpnBot?start=${user.id}`;
         }
 
-        // Кнопки и секции
-        const generateBtn = document.getElementById('main-generate-btn');
-        const keySection = document.getElementById('key-section');
-        const keyArea = document.getElementById('key-area');
-        const copyBtn = document.getElementById('copy-btn');
-
-        // КЛИК НА "ПОЛУЧИТЬ КЛЮЧ"
-        function requestKey() {
-            // 1. Включаем режим загрузки на кнопке
-            generateBtn.classList.add('loading');
-            generateBtn.disabled = true;
-
-            // 2. Имитируем запрос к бэкенду (2 секунды)
-            // Позже это будет заменено на tg.sendData или API запрос
-            setTimeout(() => {
-                // 3. Выключаем загрузку
-                generateBtn.classList.remove('loading');
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = '✨ Ключ получен';
-
-                // 4. Показываем секцию с ключом
-                keySection.classList.add('show');
-                
-                // 5. Вибрация (Haptic Feedback) - успех
-                tg.HapticFeedback.notificationOccurred('success');
-
-            }, 2000);
-        }
-
-        // КЛИК НА "СКОПИРОВАТЬ"
-        function copyKey() {
-            const keyText = keyArea.innerText;
+        // Переключение вкладок
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             
-            // Используем Clipboard API
-            navigator.clipboard.writeText(keyText).then(() => {
-                // Успешно скопировано
-                copyBtn.innerText = 'Скопировано!';
-                copyBtn.style.color = 'var(--accent-green)';
-                
-                // Легкая вибрация
-                tg.HapticFeedback.impactOccurred('light');
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
 
-                // Возвращаем текст кнопки через 2 секунды
-                setTimeout(() => {
-                    copyBtn.innerText = 'Скопировать';
-                    copyBtn.style.color = 'var(--button-color)';
-                }, 2000);
-            }).catch(err => {
-                console.error('Ошибка копирования: ', err);
-                alert('Не удалось скопировать ключ.');
-            });
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Выбор тарифа
+        function selectPlan(element, planId) {
+            document.querySelectorAll('.plan-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedPlan = planId;
+            tg.HapticFeedback.selectionChanged();
+        }
+
+        // Копирование VPN-ключа
+        function copyVPNKey() {
+            const key = document.getElementById('key-text').innerText;
+            navigator.clipboard.writeText(key);
+            tg.HapticFeedback.notificationOccurred('success');
+            tg.showAlert('Ключ скопирован!');
+        }
+
+        // Копирование реферальной ссылки
+        function copyRefLink() {
+            const link = document.getElementById('ref-link').innerText;
+            navigator.clipboard.writeText(link);
+            tg.HapticFeedback.notificationOccurred('success');
+            tg.showAlert('Ссылка скопирована!');
+        }
+
+        // Действия с отправкой данных в бота
+        function buySubscription() {
+            tg.sendData(JSON.stringify({ action: "buy_plan", plan: selectedPlan }));
+        }
+
+        function depositBalance() {
+            tg.sendData(JSON.stringify({ action: "deposit" }));
+        }
+
+        function openSupport() {
+            tg.openTelegramLink("https://t.me/your_support_username");
+        }
+
+        function openLink(url) {
+            tg.openLink(url);
         }
     </script>
 </body>
